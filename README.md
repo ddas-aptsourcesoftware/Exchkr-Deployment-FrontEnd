@@ -1,2 +1,2 @@
 # Exchkr-Deployment-FrontEnd
-Exchkr front end repository for deployment
+Exchkr club management application front end repository
