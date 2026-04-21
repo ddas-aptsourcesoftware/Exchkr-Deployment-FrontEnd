@@ -39,7 +39,11 @@ export default function LoginPage() {
 
       if (availableClubs && availableClubs.length > 0) {
         const defaultClubId = availableClubs[0].clubId;
-        const user = await authService.selectClub(userId, defaultClubId);
+        const { user, accessToken } = await authService.selectClub(
+          userId,
+          defaultClubId,
+        );
+        document.cookie = `frontendAccessToken=${accessToken}; path=/; SameSite=Strict`;
         routeByRoles(user.roles);
       } else {
         routeByRoles(roles);
@@ -58,6 +62,7 @@ export default function LoginPage() {
         default:
           setError("Something went wrong. Please try again later.");
       }
+    } finally {
       setLoading(false);
     }
   };

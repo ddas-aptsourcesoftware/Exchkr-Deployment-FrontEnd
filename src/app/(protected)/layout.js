@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 export default async function ProtectedLayout({ children }) {
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken");
+  const accessToken = cookieStore.get("frontendAccessToken");
 
   // If no token → login. 
   if (!accessToken) {

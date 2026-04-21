@@ -22,7 +22,7 @@ export function proxy(request) {
     pathname.startsWith("/images") ||
     pathname === "/login" ||
     pathname === "/club-creation" ||
-     pathname === "/club-donation" ||
+    pathname === "/club-donation" ||
     pathname === "/update-password" ||
     pathname === "/unauthorized"
   ) {
@@ -30,7 +30,8 @@ export function proxy(request) {
   }
 
   // 1. GET ACCESS TOKEN
-  const cookie = request.cookies.get("accessToken");
+  const cookie = request.cookies.get("frontendAccessToken");
+
   const accessToken = cookie?.value;
 
   if (!accessToken) {
@@ -95,9 +96,7 @@ export function proxy(request) {
   return NextResponse.next();
 }
 
-
 /*
 This middleware validates JWT roles and enforces role-based route access
 by redirecting users to the correct dashboard or unauthorized page.
 */
-

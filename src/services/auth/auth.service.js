@@ -23,7 +23,7 @@ export const authService = {
   selectClub: async (userId, clubId) => {
     try {
       const response = await authApi.selectClub(userId, clubId);
-      const { user } = response.data;
+      const { user, accessToken } = response.data;
 
       if (!user || !user.roles) {
         throw new Error("GENERIC_ERROR");
@@ -32,7 +32,7 @@ export const authService = {
       const authStore = useAuthStore.getState();
       authStore.setUser(user);
 
-      return user;
+      return {user, accessToken};
     } catch (error) {
       const status = error.response?.status;
 
