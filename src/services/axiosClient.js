@@ -10,36 +10,6 @@ const getCookie = (name) => {
   return match ? decodeURIComponent(match[2]) : null;
 };
 
-const getAllCookies = () => {
-  if (typeof document === "undefined") return {};
-  return document.cookie.split("; ").reduce((acc, cookie) => {
-    const [name, value] = cookie.split("=");
-    acc[name] = decodeURIComponent(value);
-    return acc;
-  }, {});
-};
-
-/* ---------------------------------------
-   XSRF Token Cache
----------------------------------------- */
-let cachedXsrfToken = null;
-let lastCookieCheck = 0;
-const CACHE_DURATION = 50;
-
-const getLatestXsrfToken = () => {
-  const now = Date.now();
-  if (now - lastCookieCheck > CACHE_DURATION) {
-    cachedXsrfToken = getCookie("XSRF-TOKEN");
-    lastCookieCheck = now;
-  }
-  return cachedXsrfToken;
-};
-
-const refreshXsrfCache = () => {
-  cachedXsrfToken = getCookie("XSRF-TOKEN");
-  lastCookieCheck = Date.now();
-};
-
 /* ---------------------------------------
    Axios instance
 ---------------------------------------- */
@@ -79,16 +49,15 @@ axiosClient.interceptors.request.use(
     const method = config.method?.toUpperCase();
     const unsafeMethods = ["POST", "PUT", "PATCH", "DELETE"];
 
-    // ❗ Do NOT attach CSRF token for login & auth endpoints
+    // Skip auth endpoints
     if (AUTH_EXCLUDED_PATHS.some((p) => config.url?.includes(p))) {
       return config;
     }
 
-    if (unsafeMethods.includes(method)) {
-      const xsrfToken = getLatestXsrfToken();
-      if (xsrfToken) {
-        config.headers["X-XSRF-TOKEN"] = xsrfToken;
-      }
+    // Attach Access Token
+    const accessToken = getCookie("frontendAccessToken");
+    if (accessToken) {
+      config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
     return config;
@@ -100,10 +69,7 @@ axiosClient.interceptors.request.use(
    Response Interceptor
 ---------------------------------------- */
 axiosClient.interceptors.response.use(
-  (response) => {
-    refreshXsrfCache();
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
@@ -116,22 +82,9 @@ axiosClient.interceptors.response.use(
       requestUrl.includes(p)
     );
 
-    // ❌ NEVER retry CSRF or refresh on auth endpoints
+    // NEVER retry refresh on auth endpoints
     if (isAuthEndpoint) {
       return Promise.reject(error);
-    }
-
-    /* ---- 403 CSRF retry ---- */
-    if (error.response.status === 403 && !originalRequest._csrfRetry) {
-      originalRequest._csrfRetry = true;
-      await new Promise((r) => setTimeout(r, 150));
-      refreshXsrfCache();
-
-      const fresh = getLatestXsrfToken();
-      if (fresh && fresh !== originalRequest.headers["X-XSRF-TOKEN"]) {
-        originalRequest.headers["X-XSRF-TOKEN"] = fresh;
-        return axiosClient(originalRequest);
-      }
     }
 
     /* ---- 401 refresh flow ---- */
@@ -147,22 +100,19 @@ axiosClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        refreshXsrfCache();
-        const xsrfToken = getLatestXsrfToken();
-
-        const refreshConfig = { withCredentials: true };
-        if (xsrfToken) {
-          refreshConfig.headers = { "X-XSRF-TOKEN": xsrfToken };
-        }
+        const refreshToken = getCookie("refreshToken");
 
         await axios.post(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh-token`,
           {},
-          refreshConfig
+          {
+            withCredentials: true,
+            headers: refreshToken
+              ? { Authorization: `Bearer ${refreshToken}` }
+              : {},
+          }
         );
 
-        await new Promise((r) => setTimeout(r, 150));
-        refreshXsrfCache();
         processQueue(null);
 
         return axiosClient(originalRequest);
