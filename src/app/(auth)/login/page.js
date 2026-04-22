@@ -39,11 +39,11 @@ export default function LoginPage() {
 
       if (availableClubs && availableClubs.length > 0) {
         const defaultClubId = availableClubs[0].clubId;
-        const { user, accessToken } = await authService.selectClub(
-          userId,
-          defaultClubId,
-        );
-        document.cookie = `frontendAccessToken=${accessToken}; path=/; SameSite=Strict`;
+        const { user, accessToken, refreshToken } =
+          await authService.selectClub(userId, defaultClubId);
+        document.cookie = `accessToken=${accessToken}; path=/; SameSite=Strict`;
+        document.cookie = `refreshToken=${refreshToken}; path=/; SameSite=Strict`;
+
         routeByRoles(user.roles);
       } else {
         routeByRoles(roles);

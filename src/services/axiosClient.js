@@ -1,13 +1,47 @@
 import axios from "axios";
-import { useAuthStore } from "../stores/authStore";
 
 /* ---------------------------------------
-   Cookie helpers
+   Cookie helper
 ---------------------------------------- */
 const getCookie = (name) => {
   if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+
+  const match = document.cookie.match(
+    new RegExp("(^| )" + name + "=([^;]+)")
+  );
+
   return match ? decodeURIComponent(match[2]) : null;
+};
+
+/* ---------------------------------------
+   Token sanitizer — strips accidental "Bearer " prefix
+---------------------------------------- */
+const sanitizeToken = (token) => {
+  if (!token) return null;
+  const stripped = token.startsWith("Bearer ") ? token.slice(7) : token;
+  return stripped.trim();
+};
+
+/* ---------------------------------------
+   Cookie setter — always stores raw token
+---------------------------------------- */
+const setAuthCookies = (accessToken, refreshToken) => {
+  const rawAccess = sanitizeToken(accessToken);
+  const rawRefresh = sanitizeToken(refreshToken);
+
+  if (rawAccess) {
+    document.cookie = `accessToken=${rawAccess}; path=/; SameSite=Strict`;
+  }
+  if (rawRefresh) {
+    document.cookie = `refreshToken=${rawRefresh}; path=/; SameSite=Strict`;
+  }
+};
+
+const clearAuthCookies = () => {
+  document.cookie =
+    "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict";
+  document.cookie =
+    "refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict";
 };
 
 /* ---------------------------------------
@@ -19,7 +53,7 @@ const axiosClient = axios.create({
 });
 
 /* ---------------------------------------
-   Refresh Token Handling
+   Refresh handling
 ---------------------------------------- */
 let isRefreshing = false;
 let failedQueue = [];
@@ -44,18 +78,9 @@ const AUTH_EXCLUDED_PATHS = [
 ---------------------------------------- */
 axiosClient.interceptors.request.use(
   (config) => {
-    if (typeof document === "undefined") return config;
+    const raw = getCookie("accessToken");
+    const accessToken = sanitizeToken(raw);
 
-    const method = config.method?.toUpperCase();
-    const unsafeMethods = ["POST", "PUT", "PATCH", "DELETE"];
-
-    // Skip auth endpoints
-    if (AUTH_EXCLUDED_PATHS.some((p) => config.url?.includes(p))) {
-      return config;
-    }
-
-    // Attach Access Token
-    const accessToken = getCookie("frontendAccessToken");
     if (accessToken) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
@@ -82,12 +107,11 @@ axiosClient.interceptors.response.use(
       requestUrl.includes(p)
     );
 
-    // NEVER retry refresh on auth endpoints
     if (isAuthEndpoint) {
       return Promise.reject(error);
     }
 
-    /* ---- 401 refresh flow ---- */
+    /* ---- 401 REFRESH FLOW ---- */
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -100,9 +124,10 @@ axiosClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = getCookie("refreshToken");
+        const raw = getCookie("refreshToken");
+        const refreshToken = sanitizeToken(raw);
 
-        await axios.post(
+        const { data } = await axios.post(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh-token`,
           {},
           {
@@ -113,13 +138,17 @@ axiosClient.interceptors.response.use(
           }
         );
 
+        setAuthCookies(data.accessToken, data.refreshToken);
+
         processQueue(null);
 
         return axiosClient(originalRequest);
       } catch (e) {
         processQueue(e);
-        useAuthStore.getState().clearUser();
+        clearAuthCookies();
+
         if (typeof window !== "undefined") window.location.href = "/login";
+
         return Promise.reject(e);
       } finally {
         isRefreshing = false;

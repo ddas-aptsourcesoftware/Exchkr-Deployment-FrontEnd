@@ -2,103 +2,69 @@ import axiosClient from "../axiosClient";
 
 export const officerApi = {
   addMember: async (payload) => {
-    return axiosClient.post("/api/officer/members", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/officer/members", payload);
   },
 
   fetchMembers: async () => {
-    return axiosClient.get("/api/officer/members", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/officer/members");
   },
 
   memberCount: async () => {
-    return axiosClient.get("/api/officer/members/count", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/officer/members/count");
   },
 
   bankConnectionStatus: async () => {
-    return axiosClient.get("/api/plaid/status", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/plaid/status");
   },
 
   generateLinkToken: async (payload) => {
-    return axiosClient.post("/api/plaid/link-token", null, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/plaid/link-token", null);
   },
 
   exchangePublicToken: async (payload) => {
-    return axiosClient.post("/api/plaid/exchange-token", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/plaid/exchange-token", payload);
   },
 
   getBankBalance: async () => {
-    return axiosClient.get("/api/plaid/balance", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/plaid/balance");
   },
 
   changeDefaultAccount: async (payload) => {
-    return axiosClient.patch("/api/plaid/default-account", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.patch("/api/plaid/default-account", payload);
   },
 
   disconnectBank: async () => {
-    return axiosClient.post("/api/plaid/unlink", {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/plaid/unlink");
   },
 
   reactivateBank: async () => {
-    return axiosClient.post("/api/plaid/reactivate", {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/plaid/reactivate");
   },
 
   stripeOnboarding: async (payload) => {
-    return axiosClient.post("/api/stripe/account-onboarding", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/stripe/account-onboarding", payload);
   },
 
   getClubBalance: async () => {
-    return axiosClient.get("/api/stripe/stripe-balance", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/stripe/stripe-balance");
   },
   clubPaymentToMember: async (payload) => {
-    return axiosClient.post("/api/stripe/club-payment-intent", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/stripe/club-payment-intent", payload);
   },
   reimbursementRequestList: async () => {
-    return axiosClient.get("/api/club/finance/reimbursement-request-list", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/club/finance/reimbursement-request-list");
   },
 
   reimbursementRequestReject: async (payload) => {
     return axiosClient.post(
       "/api/club/finance/reimbursement-request-reject",
       payload,
-      {
-        withCredentials: true,
-      },
     );
   },
   reimbursementRequestApprove: async (payload) => {
     return axiosClient.post(
       "/api/club/finance/reimbursement-request-approve",
       payload,
-      {
-        withCredentials: true,
-      },
     );
   },
   reimbursementReceiptDownload: (payload) => {
@@ -106,15 +72,12 @@ export const officerApi = {
       "/api/club/finance/reimbursement-receipt-download",
       payload,
       {
-        withCredentials: true,
         responseType: "blob", // For file download
       },
     );
   },
   saveTransaction: async (payload) => {
-    return axiosClient.post("/api/club/finance/record-success", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/club/finance/record-success", payload);
   },
 
   getTransactionHistory: async ({ page = 0, size = 10 }) => {
@@ -123,26 +86,20 @@ export const officerApi = {
         page,
         size,
       },
-      withCredentials: true,
     });
   },
 
   downloadTransactionHistoryPdf: async (payload) => {
     return axiosClient.post("/api/club/finance/download-trans-pdf", payload, {
-      withCredentials: true,
       responseType: "blob",
     });
   },
   addTransaction: async (payload) => {
-    return axiosClient.post("/api/club/finance/record-success", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/club/finance/record-success", payload);
   },
 
   createInvoiceAndDue: async (payload) => {
-    return axiosClient.post("/api/club/finance/create-invoice", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/club/finance/create-invoice", payload);
   },
 
   getDuesList: async ({ page = 0, size = 8 }) => {
@@ -156,104 +113,72 @@ export const officerApi = {
   },
 
   getDuesSummary: async () => {
-    return axiosClient.get("/api/club/finance/dues-summary", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/club/finance/dues-summary");
   },
 
   getFinanceSummary: async () => {
-    return axiosClient.get("/api/club/finance/finance-summary", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/club/finance/finance-summary");
   },
 
   sentDueReminder: async (payload) => {
-    return axiosClient.post("/api/club/finance/member-dues/remind", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/club/finance/member-dues/remind", payload);
   },
 
   sentDueReminders: async (payload) => {
     return axiosClient.post(
       "/api/club/finance/member-dues/remind-bulk",
       payload,
-      {
-        withCredentials: true,
-      },
     );
   },
 
   getPendingActions: async () => {
-    return axiosClient.get("/api/club/finance/pending-actions", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/club/finance/pending-actions");
   },
 
   getClubStripeInfo: async () => {
-    return axiosClient.get("/api/stripe/club-stripe-info", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/stripe/club-stripe-info");
   },
 
   getRecentActivity: async () => {
-    return axiosClient.get("/api/club/finance/recent-activity", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/club/finance/recent-activity");
   },
   addMembersCSV: async (payload) => {
-    return axiosClient.post("/api/officer/members/csv", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/officer/members/csv", payload);
   },
 
   getSpendingCategory: async () => {
-    return axiosClient.get("/api/club/finance/spending-by-category", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/club/finance/spending-by-category");
   },
 
   getMonthlySpending: async () => {
-    return axiosClient.get("/api/club/finance/monthly-spending", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/club/finance/monthly-spending");
   },
 
   addBudget: async (payload) => {
-    return axiosClient.post("/api/club/finance/budget-setup", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/club/finance/budget-setup", payload);
   },
 
   updateBudget: async (payload) => {
-    return axiosClient.patch("/api/club/finance/budget", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.patch("/api/club/finance/budget", payload);
   },
 
   getClubBudgetSummary: async () => {
-    return axiosClient.get("/api/club/finance/budget-summary", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/club/finance/budget-summary");
   },
 
   downloadDuesListPdf: async (payload) => {
     return axiosClient.post("/api/club/finance/download-dues-pdf", payload, {
-      withCredentials: true,
       responseType: "blob",
     });
   },
 
   budgetCategories: {
     create: async (payload) => {
-      return axiosClient.post("/api/club/finance/budget-categories", payload, {
-        withCredentials: true,
-      });
+      return axiosClient.post("/api/club/finance/budget-categories", payload);
     },
 
     getAll: async () => {
-      return axiosClient.get("/api/club/finance/budget-categories", {
-        withCredentials: true,
-      });
+      return axiosClient.get("/api/club/finance/budget-categories");
     },
   },
 };

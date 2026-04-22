@@ -21,15 +21,11 @@ export const authApi = {
   },
 
   updatePassword: async (payload) => {
-    return axiosClient.post("/api/password/reset", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/password/reset", payload);
   },
 
   getPlatformUniversities: async () => {
-    return axiosClient.get("/api/donation/get-universities", {
-      withCredentials: true,
-    });
+    return axiosClient.get("/api/donation/get-universities");
   },
 
   getPlatformClubs: async (universityName) => {
@@ -40,14 +36,10 @@ export const authApi = {
   },
 
   donationPaymentToClub: async (payload) => {
-    return axiosClient.post("/api/donation/donation-payment-intent", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/donation/donation-payment-intent", payload);
   },
 
   saveTransactionForClubDonation: async (payload) => {
-    return axiosClient.post("/api/donation/save-donation", payload, {
-      withCredentials: true,
-    });
+    return axiosClient.post("/api/donation/save-donation", payload);
   },
 };

@@ -30,7 +30,7 @@ export function proxy(request) {
   }
 
   // 1. GET ACCESS TOKEN
-  const cookie = request.cookies.get("frontendAccessToken");
+  const cookie = request.cookies.get("accessToken");
 
   const accessToken = cookie?.value;
 

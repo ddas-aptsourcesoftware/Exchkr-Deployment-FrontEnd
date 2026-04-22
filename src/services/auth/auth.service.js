@@ -23,7 +23,7 @@ export const authService = {
   selectClub: async (userId, clubId) => {
     try {
       const response = await authApi.selectClub(userId, clubId);
-      const { user, accessToken } = response.data;
+      const { user, accessToken, refreshToken } = response.data;
 
       if (!user || !user.roles) {
         throw new Error("GENERIC_ERROR");
@@ -32,7 +32,7 @@ export const authService = {
       const authStore = useAuthStore.getState();
       authStore.setUser(user);
 
-      return {user, accessToken};
+      return { user, accessToken, refreshToken };
     } catch (error) {
       const status = error.response?.status;
 
@@ -46,7 +46,6 @@ export const authService = {
 
   logout: async () => {
     try {
-      // Call Express server to clear httpOnly cookies
       await authApi.logout();
     } catch (err) {
       console.error("Logout error:", err);
@@ -57,6 +56,13 @@ export const authService = {
 
     // Clear Zustand state
     useAuthStore.getState().clearUser();
+
+    // clear cookies
+    document.cookie =
+      "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Strict";
+
+    document.cookie =
+      "refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Strict";
   },
 
   createClub: async (payload) => {
